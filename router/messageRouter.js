@@ -11,10 +11,11 @@ const message = {
 const route = express.Router();
 
 // json? 파일을 어떻게 가져올건지? 모듈이 이렇게 나뉘어져있는데 app과 데이터를 어떻게 공유할건지?
+// 일단 이곳에 메모리를 만듦.
 route.get('/',(req,res,next)=>{
     if(req.query){
         // name이 bob이면 어떻게 가져오지?
-        
+
     }
     res.json(message);
 });
