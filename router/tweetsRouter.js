@@ -49,6 +49,7 @@ router.get('/:id',(req,res,next) => {
         res.json(data);
     }
 });
+
 router.post('/',(req,res,next) => {
     const {text,name,username} = req.body;
     const tweet = {
@@ -67,39 +68,39 @@ router.put('/:id',(req,res,next) => {
     
     const id = req.params.id;
     const {text} = req.body;
-    console.log(id);
+
     // 복사 후에 업데이트
-    const target = tweets.find(t=>t.id === id);
-    console.log(tweets[1].id);
-    console.log(target);
+    // 얕은 복사.
+    const target = tweets.find(tweet => tweet.id === id);
 
     if(!target){
         res.status(404).json({message:`tweet id(${id}) is not found`})
     }
 
-    const update = {
-        ...target, text, updatedAt: new Date()
-    }
+    // const update = {
+    //     ...target, text, updatedAt: new Date()
+    // }
     
-    let newTweets = tweets.filter(f=>f.id !== id);
-    tweets = [update, ...newTweets];
-
-
-    res.status(200).json(update);
+    // let newTweets = tweets.filter(f=>f.id !== id);
+    // tweets = [update, ...newTweets];
+    
+    target.text = text; // 얕은 복사 이므로..
+    res.status(200).json(target);
 
 });
-// router.delete('/:id',(req,res,next) => {
-//     const id = req.params.id;
-//     // 배열안의 객체들을 검색할때..
-//     const data = tweets.find(t=>t.id === id);
+router.delete('/:id',(req,res,next) => {
+    const id = req.params.id;
+    // 배열안의 객체들을 검색할때..
+    const data = tweets.find(t=>t.id === id);
     
-//     if(!data){
-//         res.status(404).json({error:`tweet id(${id} is not found)`})
-//     }else{
-//         const result = tweets.filter( f => f.id !== data.id);
-//         tweets = result;
-//         res.sendStatus(201);
-//     }
-// });
+    if(!data){
+        res.status(404).json({error:`tweet id(${id}) is not found`})
+    }else{
+        const result = tweets.filter( f => f.id !== data.id);
+        tweets = result;
+        console.log(tweets);
+        res.sendStatus(201);
+    }
+});
 
 export default router;
