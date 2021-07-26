@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import tweetsRouter from './router/tweetsRouter.js'
+// import tweetsRouter from './router/tweetsRouter.js'
+import tweetsRouter from './router/tweets.js'
 const app = express();
 
 app.use(express.json());

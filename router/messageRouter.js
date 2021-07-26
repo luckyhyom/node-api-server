@@ -1,3 +1,5 @@
+// 강의 보기 전 혼자 만든 것
+
 import express from 'express';
 // import message from '../message/message.json';
 
