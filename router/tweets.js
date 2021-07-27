@@ -19,11 +19,14 @@ const router = express.Router();
 
 // GET /tweets
 // GET /tweets?username=:username
+
+//  ()값이 아닌, 함수를 연결. req,res는?
 router.get('/', (req, res, next) => {
-  const username = req.query.username;
-  const data = username
-    ? tweetRepository.getByUsername(username)
-    : tweetRepository.getAll();
+  // username의 유무에 따라 결과가 다른데, 메소드도 두개여야하나?
+  // tweetrepository는 controller로 옮겨지나?
+  // 라우트에서 파라미터에 tweetrepository를 넣는건가?
+  // 그렇게 되면 라우트는 약간 서비스의 느낌인가? 컨트롤러와 서비스를 이어주는
+  const data = tweetController.getTweets(req,res);
   res.status(200).json(data);
 });
 
@@ -50,7 +53,7 @@ router.put('/:id', (req, res, next) => {
   const id = req.params.id;
   const text = req.body.text;
   const tweet = tweetRepository.update(id,text);
-  
+
   if (tweet) {
     res.status(200).json(tweet);
   } else {
