@@ -1,6 +1,8 @@
 import express from 'express';
 import 'express-async-errors';
+import {body} from 'express-validator';
 import * as tweetController from '../controller/tweet.js';
+import {validate} from '../middleware/validator.js';
 
 /**
  * MVC 패턴에 맞춰 수정중
@@ -21,6 +23,10 @@ import * as tweetController from '../controller/tweet.js';
 
 const router = express.Router();
 
+const validateTweet = [
+  body('text').isLength({min:3}).withMessage('too short!'),
+  validate
+]
 
 /**
  *   1. 함수 실행()의 값이 아닌, 함수를 연결
@@ -38,7 +44,7 @@ router.get('/', tweetController.getTweets);
 router.get('/:id',tweetController.getById);
 
 // POST /tweeets
-router.post('/',tweetController.create);
+router.post('/',validateTweet,tweetController.create);
 
 // PUT /tweets/:id
 router.put('/:id',tweetController.update);

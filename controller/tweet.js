@@ -1,27 +1,32 @@
 /**
  * req,res를 import없이 쓸 수 있나?
  * res를 그냥 받아서 쓸수가 있다고?
+ * 
+ * 1. 하나의 시스템이라면 동기적이어도 문제가 없나?
+ *    어쨌든 서버와 연동되면 값을 언제 받을지 모르기때문에 비동기여야함!
+ * 
+ * 2. 함수마다 동일한 코드가 계속해서 중복되면, '중요한' 내용을 한눈에 알아보기 어렵다.
  */
 
 import * as tweetRepository from '../data/tweet.js';
 
-export function getTweets(req, res, next) {
+export async function getTweets(req, res, next) {
     // username의 유무에 따라 결과가 다른데, 메소드도 두개여야하나?
     // tweetrepository는 controller로 옮겨지나?
     // 라우트에서 파라미터에 tweetrepository를 넣는건가?
     // 그렇게 되면 라우트는 약간 서비스의 느낌인가? 컨트롤러와 서비스를 이어주는
 
     const username = req.query.username;
-    const data = username
+    const data = await (username
         ? tweetRepository.getByUsername(username)
-        : tweetRepository.getAll();
+        : tweetRepository.getAll());
 
     res.status(200).json(data);
 }
 
-export function getById(req, res) {
+export async function getById(req, res) {
     const id = req.params.id;
-    const tweet = tweetRepository.getById(id);
+    const tweet = await tweetRepository.getById(id);
     if (tweet) {
     res.status(200).json(tweet);
     } else {
@@ -29,16 +34,16 @@ export function getById(req, res) {
     }
 }
 
-export function create (req, res) {
+export async function create (req, res) {
     const { text, name, username } = req.body;
-    const tweet = tweetRepository.create(name,username,text);
+    const tweet = await tweetRepository.create(name,username,text);
     res.status(201).json(tweet);
 }
 
-export function update (req, res) {
+export async function update (req, res) {
     const id = req.params.id;
     const text = req.body.text;
-    const tweet = tweetRepository.update(id,text);
+    const tweet = await tweetRepository.update(id,text);
 
     if (tweet) {
         res.status(200).json(tweet);
@@ -47,8 +52,8 @@ export function update (req, res) {
     }
 }
 
-export function remove(req, res) {
+export async function remove(req, res) {
     const id = req.params.id;
-    tweetRepository.remove(id);
+    await tweetRepository.remove(id);
     res.sendStatus(204);
 }
