@@ -5,7 +5,7 @@ import os from 'os';
 import path from 'path';
 // import bcrypt from 'bcrypt';
 import * as userRepository from '../data/auth.js';
-
+import config from '../config.js'
 
 /**
  * 1. 로그인 할때 body를 받나?
@@ -14,7 +14,9 @@ import * as userRepository from '../data/auth.js';
  * 4. repository에서는 단순 crud기능만하고, 암호 처리는 컨트롤러에서 한다.
  */
 
-const jwtExpiresInDays = '2d';
+const jwtSecretKey = config.jwt.secretKey;
+const jwtExpiresInDays = config.jwt.expires;
+const BcryptSaltRounds =  config.bCrypt.salt;
 
 
 export async function login(req, res, next) {
@@ -43,7 +45,7 @@ export async function signup(req, res, next) {
     if(found) {
         res.status(409).json({message: `${username} already exists`})
     }
-    const hashed = await bcrypt.hash(password,10);
+    const hashed = await bcrypt.hash(password, BcryptSaltRounds);
     const userInfo = { username, password: hashed, name, email, url };
     const userId = await userRepository.createUser(userInfo);
 
@@ -63,5 +65,5 @@ function createJwtToken(id) {
     return jwt.sign({
         id,
         admin: true,
-    },'ABCD1234',{ expiresIn: jwtExpiresInDays });
+    },jwtSecretKey ,{ expiresIn: jwtExpiresInDays });
 }

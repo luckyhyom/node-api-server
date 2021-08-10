@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import * as userRepository from '../data/auth.js';
+import config from '../config.js';
 
 /**
  * 도중에 요청을 넘겨받아서 처리하는 '미들웨어'
@@ -20,7 +21,7 @@ export const isAuth = async (req, res, next) => {
 
     jwt.verify(
         token,
-        'ABCD1234',
+        config.jwt.secretKey,
         async (err, decoded) => {
             if(err) {
                 console.log(authHeader);
