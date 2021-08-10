@@ -3,8 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 // import tweetsRouter from './router/tweetsRouter.js'
-import tweetsRouter from './router/tweets.js'
-import authRouter from './router/auth.js'
+import tweetsRouter from './router/tweets.js';
+import authRouter from './router/auth.js';
 
 /**
  * 
