@@ -30,9 +30,9 @@ const validateSignup = [
     validate
 ]
 
-router.get('/login',validateCredential,authController.login);
+router.post('/login', validateCredential, authController.login);
 
-router.post('/join',validateSignup,authController.join);
+router.post('/signup', validateSignup, authController.signup);
 
 router.get('/me', isAuth, authController.me);
 

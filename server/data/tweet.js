@@ -6,52 +6,54 @@
  * username,email,등은 userRepository에서 가지고 있으니 userId라는 해당 데이터를 가리키는 키만 가지고있도록 수정한다.
 */ 
 
-import * as userRepository from '../data/user.js';
+import * as userRepository from './auth.js';
 
 let tweets = [
-    {
-      id: '1',
-      text: '드림코더분들 화이팅!',
-      createdAt: new Date().toString(),
-      userId: '1',
-    },
-    {
-      id: '2',
-      text: '안뇽!',
-      createdAt: new Date().toString(),
-      userId: '1',
-    },
-  ];
+  {
+    id: '1',
+    text: '드림코더분들 화이팅!',
+    createdAt: new Date().toString(),
+    userId: '1628494552174',
+  },
+  {
+    id: '2',
+    text: '안뇽!',
+    createdAt: new Date().toString(),
+    userId: '1628494552174',
+  },
+];
 
 export async function getAll() {
-    return Promise.all(
-      tweets.map(async (tweet) => {
-        const { username, name, url } = await userRepository.findById(tweet.userId);
-        return { ...tweet, username, name, url };
-      })
-    );
+  return Promise.all(
+    tweets.map(async (tweet) => {
+      const { username, name, url } = await userRepository.findById(
+        tweet.userId
+      );
+      return { ...tweet, username, name, url };
+    })
+  );
 }
 
-export async function getByUsername(username) {
-  getAll().then((tweets) =>
+export async function getAllByUsername(username) {
+  return getAll().then((tweets) =>
     tweets.filter((tweet) => tweet.username === username)
   );
 }
 
 export async function getById(id) {
-  const found = tweets.find(tweet => tweet.id === id);
+  const found = tweets.find((tweet) => tweet.id === id);
   if (!found) {
     return null;
   }
-  const { username, name, url } = await userRepository.findById(tweet.userId);
+  const { username, name, url } = await userRepository.findById(found.userId);
   return { ...found, username, name, url };
 }
 
 export async function create(text, userId) {
   const tweet = {
-    id: Date.now().toString(),
+    id: new Date().toString(),
     text,
-    createdAt: new Date(),
+    createdAt: new Date().toString(),
     userId,
   };
 

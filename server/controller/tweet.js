@@ -18,8 +18,10 @@ export async function getTweets(req, res, next) {
 
     const username = req.query.username;
     const data = await (username
-        ? tweetRepository.getByUsername(username)
+        ? tweetRepository.getAllByUsername(username)
         : tweetRepository.getAll());
+
+        console.log(data);
 
     res.status(200).json(data);
 }
@@ -35,8 +37,8 @@ export async function getById(req, res) {
 }
 
 export async function create (req, res) {
-    const { text, name, username } = req.body;
-    const tweet = await tweetRepository.create(name,username,text);
+    const { text } = req.body;
+    const tweet = await tweetRepository.create(text, req.userId);
     res.status(201).json(tweet);
 }
 

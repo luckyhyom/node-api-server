@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 // import bcrypt from 'bcrypt';
-import * as userRepository from '../data/user.js';
+import * as userRepository from '../data/auth.js';
 
 
 /**
@@ -21,26 +21,25 @@ export async function login(req, res, next) {
     const { username, password } = req.body;
     const user = await userRepository.findByUsername(username);
     if(!user) {
-        res.status(401).json({message:'Invalid User or Password'});
+        return res.status(401).json({message:'Invalid User or Password'});
     }
     const isValidPassword = await bcrypt.compareSync(password,user.password);
     if(!isValidPassword) {
-        res.status(401).json({message:'Invalid User or Password'});
+        // res를 두번 호출하지 않기 위해 return을 이용해 함수를 탈출.
+        return res.status(401).json({message:'Invalid User or Password'});
     }
     const token = createJwtToken(user.id);
     
-    fs.writeFileSync(`./token/${username}`,token);
-
     // 토큰을 어떻게 클라이언트가 가지고있지?
     // 토큰을 비교하려면 서버도 가지고있어야함.
     // 토큰으로 사용자 인증하기
-    res.json(token);
+    res.json({ token, username });
 };
 
-export async function join(req, res, next) {
+export async function signup(req, res, next) {
     const { username, password, name, email, url } = req.body;
     const found = await userRepository.findByUsername(username);
-    
+    console.log(username,password);
     if(found) {
         res.status(409).json({message: `${username} already exists`})
     }
@@ -49,7 +48,7 @@ export async function join(req, res, next) {
     const userId = await userRepository.createUser(userInfo);
 
     const token = createJwtToken(userId);
-    res.status(201).json({token, userId});
+    res.status(201).json({ token, userId });
 };
 
 export async function me(req, res, next) {
@@ -64,5 +63,5 @@ function createJwtToken(id) {
     return jwt.sign({
         id,
         admin: true,
-    },'ABCD1234',{expiresIn: jwtExpiresInDays});
+    },'ABCD1234',{ expiresIn: jwtExpiresInDays });
 }
