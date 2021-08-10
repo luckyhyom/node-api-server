@@ -52,7 +52,7 @@ export async function signup(req, res, next) {
 };
 
 export async function me(req, res, next) {
-    const user = await userRepository.findById();
+    const user = await userRepository.findById(req.userId);
     if (!user) {
         return res.status(404).json({message: 'User not found'});
     }

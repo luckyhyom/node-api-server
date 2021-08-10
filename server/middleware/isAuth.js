@@ -23,6 +23,7 @@ export const isAuth = async (req, res, next) => {
         'ABCD1234',
         async (err, decoded) => {
             if(err) {
+                console.log(authHeader);
                 console.log(err);
                 return res.status(401).json({AUTH_ERROR})
             }
