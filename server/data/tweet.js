@@ -8,21 +8,6 @@
 
 import * as userRepository from './auth.js';
 
-let tweets = [
-  {
-    id: '1',
-    text: '드림코더분들 화이팅!',
-    createdAt: new Date().toString(),
-    userId: '1628494552174',
-  },
-  {
-    id: '2',
-    text: '안뇽!',
-    createdAt: new Date().toString(),
-    userId: '1628494552174',
-  },
-];
-
 export async function getAll() {
   return Promise.all(
     tweets.map(async (tweet) => {

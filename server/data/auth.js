@@ -1,13 +1,4 @@
-let users = [ 
-    {
-        id: '1628494552174',
-        username: 'gyals1479',
-        password: '$2b$10$fqYueKDYpjD4JYtbE5lPXer0/s1SZC6bYUrtAazPcaw5rUrtAI2yS',
-        name: '김효민2',
-        email: 'bs_khm@naver.com',
-        url: '',
-    }
-];
+import {db} from '../db/database.js';
 
 export async function findByUsername(username) {
     return users.find((user) => user.username === username);
@@ -19,7 +10,13 @@ export async function findById(id) {
 }
 
 export async function createUser(user) {
-    const created = { ...user, id: Date.now().toString() };
-    users.push(created);
-    return created.id;
+    const {username, password, name, email, url} = user;
+    return db.excute(
+        'INSERT INTO users (username, password, name, email, url) VALUES (?,?,?,?,?)',
+        [username, password, name, email, url]
+    )
+    .then((result) => {
+        console.log(result);
+        return result;
+    })
 }
