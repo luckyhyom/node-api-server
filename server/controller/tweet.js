@@ -8,6 +8,7 @@
  * 2. 함수마다 동일한 코드가 계속해서 중복되면, '중요한' 내용을 한눈에 알아보기 어렵다.
  */
 
+import { getSocketIO } from '../connection/socket.js';
 import * as tweetRepository from '../data/tweet.js';
 
 export async function getTweets(req, res, next) {
@@ -20,8 +21,6 @@ export async function getTweets(req, res, next) {
     const data = await (username
         ? tweetRepository.getAllByUsername(username)
         : tweetRepository.getAll());
-
-        console.log(data);
 
     res.status(200).json(data);
 }
@@ -39,6 +38,7 @@ export async function getById(req, res) {
 export async function create (req, res) {
     const { text } = req.body;
     const tweet = await tweetRepository.create(text, req.userId);
+    getSocketIO.emit('tweet', tweet);
     res.status(201).json(tweet);
 }
 
@@ -70,7 +70,7 @@ export async function remove(req, res) {
         // 401: 비로그인, 403: 권한문제
         return res.status(403).json({message:"fuck you~"});
     }
-    
+
     await tweetRepository.remove(id);
     res.sendStatus(204);
 }

@@ -27,3 +27,5 @@ export const config = {
         port: required('HOST_PORT',8080),
     }
 }
+
+export default config;

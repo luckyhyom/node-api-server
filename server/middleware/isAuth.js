@@ -12,8 +12,6 @@ export const isAuth = async (req, res, next) => {
 
     const authHeader = req.get('Authorization');
     if(!(authHeader && authHeader.startsWith('Bearer '))) {
-        console.log(authHeader);
-
         return res.status(401).json(AUTH_ERROR);
     }
 
@@ -24,13 +22,10 @@ export const isAuth = async (req, res, next) => {
         config.jwt.secretKey,
         async (err, decoded) => {
             if(err) {
-                console.log(authHeader);
-                console.log(err);
                 return res.status(401).json({AUTH_ERROR})
             }
             const user = await userRepository.findById(decoded.id);
             if (!user) {
-                console.log(err);
                 return  res.status(401).json(AUTH.ERROR);
             }
             // 토큰을 보내서 회원 정보 키를 얻는다, 키를 이용해 회원 정보를 얻는다.

@@ -15,16 +15,11 @@ export async function findByUsername(username) {
 
 export async function findById(id) {
       const result = users.find((user) => user.id === id);
-      console.log(result , "result!!!!!");
-      if(!result){
-        console.log(result,'이게뭐야ㅕ');
-      }
     return result;
 }
 
 export async function createUser(user) {
     const created = { ...user, id: Date.now().toString() };
     users.push(created);
-    console.log(users);
     return created.id;
 }

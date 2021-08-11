@@ -41,7 +41,6 @@ export async function login(req, res, next) {
 export async function signup(req, res, next) {
     const { username, password, name, email, url } = req.body;
     const found = await userRepository.findByUsername(username);
-    console.log(username,password);
     if(found) {
         res.status(409).json({message: `${username} already exists`})
     }

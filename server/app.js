@@ -5,6 +5,7 @@ import helmet from 'helmet';
 // import tweetsRouter from './router/tweetsRouter.js'
 import tweetsRouter from './router/tweets.js';
 import authRouter from './router/auth.js';
+import { initSocket } from './connection/socket.js';
 
 /**
  * 
@@ -14,6 +15,8 @@ import authRouter from './router/auth.js';
  * 
  * process는 전역변수다. 어느 파일에서든 사용 가능.
  */
+
+
 
 const app = express();
 
@@ -34,5 +37,7 @@ app.use((error,req,res,next) => {
     // 에러로그 받기.
     console.error(error);
     res.sendStatus(500);
-})
-app.listen(8080);
+});
+
+const server = app.listen(8080);
+initSocket(server);
