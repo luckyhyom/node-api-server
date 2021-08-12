@@ -26,7 +26,7 @@ export const isAuth = async (req, res, next) => {
             }
             const user = await userRepository.findById(decoded.id);
             if (!user) {
-                return  res.status(401).json(AUTH.ERROR);
+                return  res.status(401).json(AUTH_ERROR);
             }
             // 토큰을 보내서 회원 정보 키를 얻는다, 키를 이용해 회원 정보를 얻는다.
             req.userId = user.id; // req.customData

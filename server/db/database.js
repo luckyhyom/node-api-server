@@ -1,10 +1,12 @@
-import mysql from 'mysql2';
 import config from '../config.js';
-const pool = mysql.createPool({
-    host: config.db.host,
-    user: config.db.user,
-    database: config.db.database,
-    password: config.db.password,
-});
 
-export const db = pool.promise();
+import pkg from 'sequelize';
+const { Sequelize, DataTypes } = pkg;
+const { host, user, database, password } = config.db;
+
+export const dataType = DataTypes;
+export const sequelize = new Sequelize( database, user, password, { host, dialect: 'mysql' } );
+
+sequelize.sync().then((client) => {
+    console.log('sequelize good');
+});
