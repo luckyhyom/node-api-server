@@ -51,7 +51,7 @@ export async function update (req, res) {
     }
     if (tweet.userId !== req.userId) {
         // 401: 비로그인, 403: 권한문제
-        return res.status(403).json({message:"fuck you~"});
+        return res.status(403).json({message:"hate you~"});
     }
 
     const updated = await tweetRepository.update(id,text);
@@ -68,7 +68,7 @@ export async function remove(req, res) {
     }
     if (tweet.userId !== req.userId) {
         // 401: 비로그인, 403: 권한문제
-        return res.status(403).json({message:"fuck you~"});
+        return res.status(403).json({message:"hate you~"});
     }
 
     await tweetRepository.remove(id);
