@@ -1,9 +1,5 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-// import bcrypt from 'bcrypt';
 import * as userRepository from '../data/auth.js';
 import config from '../config.js'
 

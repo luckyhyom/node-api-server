@@ -5,71 +5,68 @@
  * 하나의 정보는 한 곳에 있는게 좋다.
  * username,email,등은 userRepository에서 가지고 있으니 userId라는 해당 데이터를 가리키는 키만 가지고있도록 수정한다.
 */ 
+import MongoDb from 'mongodb';
+import { getTweets } from '../db/database.js';
+import * as UserRepository from './auth.js'
+const ObjectID = MongoDb.ObjectID;
 
-import * as userRepository from './auth.js';
-
-let tweets = [
-  {
-    id: '1',
-    text: '드림코더분들 화이팅!',
-    createdAt: new Date().toString(),
-    userId: '1628494552174',
-  },
-  {
-    id: '2',
-    text: '안뇽!',
-    createdAt: new Date().toString(),
-    userId: '1628494552174',
-  },
-];
 
 export async function getAll() {
-  return Promise.all(
-    tweets.map(async (tweet) => {
-      const { username, name, url } = await userRepository.findById(
-        tweet.userId
-      );
-      return { ...tweet, username, name, url };
-    })
-  );
+    return getTweets()
+        .find()
+        .sort({ createdAt: -1 })
+        .toArray()
+        .then(mapTweets);
 }
 
 export async function getAllByUsername(username) {
-  return getAll().then((tweets) =>
-    tweets.filter((tweet) => tweet.username === username)
-  );
+    return getTweets()
+        .find({ username })
+        .sort({ createdAt: -1 })
+        .toArray()
+        .then(mapTweets);
 }
 
 export async function getById(id) {
-  const found = tweets.find((tweet) => tweet.id === id);
-  if (!found) {
-    return null;
-  }
-  const { username, name, url } = await userRepository.findById(found.userId);
-  return { ...found, username, name, url };
+    return getTweets()
+        .find({ _id: new ObjectID(id) })
+        .next()
+        .then(mapOptionalTweet);
 }
 
 export async function create(text, userId) {
-  const tweet = {
-    id: Date.now().toString(),
-    text,
-    createdAt: new Date(),
-    userId,
-  };
-
-  tweets = [tweet, ...tweets];
-
-  return getById(tweet.id);
+    return UserRepository.findById(userId).then(user => 
+        getTweets().insertOne({
+            text,
+            createdAt:new Date(),
+            userId,
+            name: user.name,
+            username: user.username,
+            url: user.url,
+        })
+    )
+    .then((result) => result.ops[0])
+    .then(mapOptionalTweet);
 }
 
 export async function update(id, text) {
-  const tweet = tweets.find(tweet => tweet.id === id);
-  if(tweet) {
-    tweet.text = text;
-  }
-  return getById(tweet.id);
+    return getTweets().findOneAndUpdate(
+        { _id: new ObjectID(id) },
+        { $set: { text } },
+        { returnOriginal: false },
+    )
+    .then((result) => result.value)
+    .then(mapOptionalTweet);
 }
 
 export async function remove(id) {
-  tweets = tweets.filter(tweet => tweet.id !== id);
+    return getTweets().deleteOne({ _id: new ObjectID(id) });
+}
+
+function mapTweets(tweets) {
+    return tweets.map(mapOptionalTweet)
+}
+
+function mapOptionalTweet(tweet) {
+    return tweet ? { ...tweet, id: tweet._id.toString() } : tweet;
 }

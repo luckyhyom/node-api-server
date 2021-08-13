@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import tweetsRouter from './router/tweets.js';
 import authRouter from './router/auth.js';
 import { initSocket } from './connection/socket.js';
+import { connectDB } from './db/database.js';
 
 /**
  * 
@@ -39,5 +40,9 @@ app.use((error,req,res,next) => {
     res.sendStatus(500);
 });
 
-const server = app.listen(8080);
-initSocket(server);
+connectDB()
+    .then(() => {
+        const server = app.listen(8080);
+        initSocket(server);
+    })
+    .catch(console.error);
