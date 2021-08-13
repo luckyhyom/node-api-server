@@ -6,7 +6,3 @@ const { host, user, database, password } = config.db;
 
 export const dataType = DataTypes;
 export const sequelize = new Sequelize( database, user, password, { host, dialect: 'mysql' } );
-
-sequelize.sync().then((client) => {
-    console.log('sequelize good');
-});

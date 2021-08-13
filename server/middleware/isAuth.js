@@ -30,6 +30,7 @@ export const isAuth = async (req, res, next) => {
             }
             // 토큰을 보내서 회원 정보 키를 얻는다, 키를 이용해 회원 정보를 얻는다.
             req.userId = user.id; // req.customData
+            req.token = token;
             next();
         }
     )
