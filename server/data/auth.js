@@ -1,25 +1,45 @@
-import Mongoose from 'mongoose';
-import { useVirtualId } from '../db/database.js';
+import { sequelize } from '../db/database.js';
+import pkg from 'sequelize';
+const { DataTypes } = pkg;
 
-const userSchema = new Mongoose.Schema({
-    username: { type: String, required: true },
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    password: { type: String, required: true},
-    url: String,
+export const User = sequelize.define('user', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+    },
+    username: {
+        type: DataTypes.STRING(45),
+        allowNull:  false,
+    },
+    password: {
+        type: DataTypes.STRING(128),
+        allowNull: false,
+    },
+    name: {
+        type: DataTypes.STRING(128),
+        allowNull: false,
+    },
+    email: {
+        type: DataTypes.STRING(128),
+        allowNull: false,
+    },
+    url: {
+        type: DataTypes.TEXT
+    }
+  }, {
 });
 
-useVirtualId(userSchema);
-const User = Mongoose.model('User',userSchema);
 
 export async function findByUsername(username) {
-    return User.findOne({ username });
+    return User.findOne({ where: { username } });
 }
 
 export async function findById(id) {
-    return User.findById(id);
+    return User.findByPk(id);
 }
 
 export async function createUser(user) {
-    return new User(user).save().then((data) => data.id);
+    return User.create(user).then(data => {console.log(data); return data.dataValues.id});
 }

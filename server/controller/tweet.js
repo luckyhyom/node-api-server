@@ -8,8 +8,8 @@
  * 2. 함수마다 동일한 코드가 계속해서 중복되면, '중요한' 내용을 한눈에 알아보기 어렵다.
  */
 
-import { getSocketIO } from '../connection/socket.js';
 import * as tweetRepository from '../data/tweet.js';
+import { getSocketIO } from '../connection/socket.js';
 
 export async function getTweets(req, res, next) {
     // username의 유무에 따라 결과가 다른데, 메소드도 두개여야하나?
@@ -29,17 +29,17 @@ export async function getById(req, res) {
     const id = req.params.id;
     const tweet = await tweetRepository.getById(id);
     if (tweet) {
-    res.status(200).json(tweet);
+        res.status(200).json(tweet);
     } else {
-    res.status(404).json({ message: `Tweet id(${id}) not found` });
+        res.status(404).json({ message: `Tweet id(${id}) not found` });
     }
 }
 
 export async function create (req, res) {
     const { text } = req.body;
     const tweet = await tweetRepository.create(text, req.userId);
-    getSocketIO().emit('tweet', tweet);
     res.status(201).json(tweet);
+    getSocketIO().emit('tweets', tweet);
 }
 
 export async function update (req, res) {
@@ -55,7 +55,6 @@ export async function update (req, res) {
     }
 
     const updated = await tweetRepository.update(id,text);
-
     res.status(200).json(updated);
 }
 

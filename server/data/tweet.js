@@ -1,48 +1,84 @@
-import Mongoose from 'mongoose';
-import { useVirtualId } from '../db/database.js';
-import * as UserRepository from './auth.js'
+import { sequelize, dataType } from '../db/database.js';
+import { User } from './auth.js';
 
-const tweetSchema = new Mongoose.Schema(
-    {
-        text: { type: String, required: true },
-        userId: { type: String, required: true },
-        name: { type: String, required: true },
-        username: { type: String, required: true },
-        url: String,
+import pkg from 'sequelize';
+const { Sequelize } = pkg;
+
+const Tweet = sequelize.define('Tweet', {
+  id: {
+    type: dataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  text: {
+    type: dataType.TEXT,
+    allowNull: false,
+  },
+});
+
+Tweet.belongsTo(User);
+
+const INCLUDE_UER = {
+    attributes: [
+        'id',
+        'text',
+        'userId',
+        'createdAt',
+        [Sequelize.col('user.username'),'username'],
+        [Sequelize.col('user.name'),'name'],
+        [Sequelize.col('user.url'),'url'],
+    ],
+    include: {
+        model: User,
+        attributes: [],
     },
-    { timestamps: true }
-);
+};
 
-useVirtualId(tweetSchema);
-const Tweet = Mongoose.model('Tweet', tweetSchema);
+const ORDER_DESC = {
+    order: [['createdAt', 'DESC']],
+}
 
 export async function getAll() {
-    return Tweet.find().sort({ createdAt: -1 });
+    return Tweet.findAll({ ...INCLUDE_UER, ...ORDER_DESC });
 }
 
 export async function getAllByUsername(username) {
-    return Tweet.find({ username }).sort({ createdAt: -1 });
+    return Tweet.findAll({
+        ...INCLUDE_UER,
+        ...ORDER_DESC,
+        include: {
+            ...INCLUDE_UER.include,
+            where: { username },
+        },
+    });
 }
 
 export async function getById(id) {
-    return Tweet.findById(id);
+    return Tweet.findOne({
+        ...INCLUDE_UER,
+        where: { id },
+    });
 }
 
 export async function create(text, userId) {
-    return UserRepository.findById(userId).then((user) => 
-        new Tweet({
-            text,
-            userId,
-            name: user.name,
-            username: user.username,
-        }).save()
-    );
+    return Tweet.create({ text, userId })
+        .then((data) => {
+            getById(data.dataValues.id)
+        });
 }
 
 export async function update(id, text) {
-    return Tweet.findByIdAndUpdate(id, { text }, { returnOriginal: false });
+    return Tweet.findByPk(id, INCLUDE_UER)
+        .then(tweet => {
+            tweet.text = text;
+            return tweet.save();
+        })
 }
 
 export async function remove(id) {
-    return Tweet.findByIdAndRemove(id);
+  return Tweet.findByPk(id)
+    .then((tweet) => {
+        tweet.destroy()
+    });
 }
