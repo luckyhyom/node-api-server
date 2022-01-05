@@ -22,7 +22,7 @@ export const isAuth = async (req, res, next) => {
         config.jwt.secretKey,
         async (err, decoded) => {
             if(err) {
-                return res.status(401).json({AUTH_ERROR})
+                return res.status(401).json(AUTH_ERROR)
             }
             const user = await userRepository.findById(decoded.id);
             if (!user) {
