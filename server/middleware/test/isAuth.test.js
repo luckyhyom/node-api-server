@@ -83,7 +83,6 @@ describe('isAuth', () => {
             callback(undefined, { id: userId });
         });
         userRepository.findById = jest.fn((id) => {
-            console.log(id);
             return Promise.resolve(undefined);
         })
 
