@@ -93,4 +93,32 @@ describe('isAuth', () => {
         expect(res._getJSONData().message).toBe('Authentication Error');
         expect(next).not.toBeCalled();
     });
+
+    it('토큰 정보에 해당하는 유저를 찾을 수 없는 경우', async () => {
+        const token = faker.random.alphaNumeric(128);
+        const userId = faker.random.alphaNumeric(32);
+        const req = httpMocks.createRequest({
+            method: "GET",
+            url: "/tweets",
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        });
+        const res = httpMocks.createResponse();
+        const next = jest.fn();
+
+        jwt.verify = jest.fn((token, secret, callback) => {
+            callback(undefined, { id: userId });
+        });
+        userRepository.findById = jest.fn((id) => {
+            return Promise.resolve({id});
+        })
+
+        await isAuth(req, res, next);
+
+        expect(res.statusCode).toBe(200);
+        expect(req).toMatchObject({token, userId})
+        expect(next).toBeCalled();
+    });
+
 })
