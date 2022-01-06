@@ -7,69 +7,69 @@
  * 
  * 2. 함수마다 동일한 코드가 계속해서 중복되면, '중요한' 내용을 한눈에 알아보기 어렵다.
  */
+export class TweetController {
+    constructor(tweetRepository, getSocketIO) {
+        this.tweetRepository = tweetRepository;
+        this.getSocketIO = getSocketIO;
+    }
 
-import * as tweetRepository from '../data/tweet.js';
-import { getSocketIO } from '../connection/socket.js';
-
-export async function getTweets(req, res, next) {
-    // username의 유무에 따라 결과가 다른데, 메소드도 두개여야하나?
-    // tweetrepository는 controller로 옮겨지나?
-    // 라우트에서 파라미터에 tweetrepository를 넣는건가?
-    // 그렇게 되면 라우트는 약간 서비스의 느낌인가? 컨트롤러와 서비스를 이어주는
-
-    const username = req.query.username;
-    const data = await (username
-        ? tweetRepository.getAllByUsername(username)
-        : tweetRepository.getAll());
-
-    res.status(200).json(data);
-}
-
-export async function getById(req, res) {
-    const id = req.params.id;
-    const tweet = await tweetRepository.getById(id);
-    if (tweet) {
-        res.status(200).json(tweet);
-    } else {
-        res.status(404).json({ message: `Tweet id(${id}) not found` });
+    async getTweets(req, res, next) {
+        const username = req.query.username;
+        const data = await (username
+            ? this.tweetRepository.getAllByUsername(username)
+            : this.tweetRepository.getAll());
+    
+        res.status(200).json(data);
+    }
+    
+    async getById(req, res) {
+        const id = req.params.id;
+        const tweet = await this.tweetRepository.getById(id);
+        if (tweet) {
+            res.status(200).json(tweet);
+        } else {
+            res.status(404).json({ message: `Tweet id(${id}) not found` });
+        }
+    }
+    
+    async create (req, res) {
+        const { text } = req.body;
+        const tweet = await this.tweetRepository.create(text, req.userId);
+        res.status(201).json(tweet);
+        this.getSocketIO().emit('tweets', tweet);
+    }
+    
+    async update (req, res) {
+        const id = req.params.id;
+        const text = req.body.text;
+        const tweet = await this.tweetRepository.getById(id);
+        if (!tweet) {
+            return res.sendStatus(404);
+        }
+        if (tweet.userId !== req.userId) {
+            // 401: 비로그인, 403: 권한문제
+            return res.status(403).json({message:"hate you~"});
+        }
+    
+        const updated = await this.tweetRepository.update(id,text);
+        res.status(200).json(updated);
+    }
+    
+    async remove(req, res) {
+        const id = req.params.id;
+    
+        const tweet = await this.tweetRepository.getById(id);
+        if (!tweet) {
+            return res.sendStatus(404);
+        }
+        if (tweet.userId !== req.userId) {
+            // 401: 비로그인, 403: 권한문제
+            return res.status(403).json({message:"hate you~"});
+        }
+    
+        await this.tweetRepository.remove(id);
+        res.sendStatus(204);
     }
 }
 
-export async function create (req, res) {
-    const { text } = req.body;
-    const tweet = await tweetRepository.create(text, req.userId);
-    res.status(201).json(tweet);
-    getSocketIO().emit('tweets', tweet);
-}
 
-export async function update (req, res) {
-    const id = req.params.id;
-    const text = req.body.text;
-    const tweet = await tweetRepository.getById(id);
-    if (!tweet) {
-        return res.sendStatus(404);
-    }
-    if (tweet.userId !== req.userId) {
-        // 401: 비로그인, 403: 권한문제
-        return res.status(403).json({message:"hate you~"});
-    }
-
-    const updated = await tweetRepository.update(id,text);
-    res.status(200).json(updated);
-}
-
-export async function remove(req, res) {
-    const id = req.params.id;
-
-    const tweet = await tweetRepository.getById(id);
-    if (!tweet) {
-        return res.sendStatus(404);
-    }
-    if (tweet.userId !== req.userId) {
-        // 401: 비로그인, 403: 권한문제
-        return res.status(403).json({message:"hate you~"});
-    }
-
-    await tweetRepository.remove(id);
-    res.sendStatus(204);
-}
