@@ -6,25 +6,33 @@
  *    어쨌든 서버와 연동되면 값을 언제 받을지 모르기때문에 비동기여야함!
  * 
  * 2. 함수마다 동일한 코드가 계속해서 중복되면, '중요한' 내용을 한눈에 알아보기 어렵다.
+ * 
+ * 컨트롤러에서 테스트 할 부분
+ * 1. repo에 요청을 전달 (X)
+ * 2. 전달 값 (O)
+ * 3. 반환 값 (O), repo반환값을 그대로 대입할것이냐, dto처럼 정의된 값을 검증할 것이냐
+ * 4. 에러는?
  */
 export class TweetController {
-    constructor(tweetRepository, getSocketIO) {
+    constructor(tweetRepository, socketIO) {
         this.tweetRepository = tweetRepository;
-        this.getSocketIO = getSocketIO;
+        this.socketIO = socketIO;
     }
 
-    async getTweets(req, res, next) {
+    // arrow function을 이용하여 선언당시의 this 스코프를 유지한다.
+    getTweets = async (req, res, next) => {
         const username = req.query.username;
         const data = await (username
             ? this.tweetRepository.getAllByUsername(username)
             : this.tweetRepository.getAll());
-    
+        
         res.status(200).json(data);
     }
     
-    async getById(req, res) {
+    getById = async (req, res) => {
         const id = req.params.id;
         const tweet = await this.tweetRepository.getById(id);
+
         if (tweet) {
             res.status(200).json(tweet);
         } else {
@@ -32,14 +40,15 @@ export class TweetController {
         }
     }
     
-    async create (req, res) {
+    create = async (req, res) => {
         const { text } = req.body;
         const tweet = await this.tweetRepository.create(text, req.userId);
+
         res.status(201).json(tweet);
-        this.getSocketIO().emit('tweets', tweet);
+        this.socketIO().emit('tweets', tweet);
     }
     
-    async update (req, res) {
+    update = async (req, res) => {
         const id = req.params.id;
         const text = req.body.text;
         const tweet = await this.tweetRepository.getById(id);
@@ -55,9 +64,8 @@ export class TweetController {
         res.status(200).json(updated);
     }
     
-    async remove(req, res) {
+    remove = async (req, res) => {
         const id = req.params.id;
-    
         const tweet = await this.tweetRepository.getById(id);
         if (!tweet) {
             return res.sendStatus(404);

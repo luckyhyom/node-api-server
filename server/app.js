@@ -5,9 +5,11 @@ import helmet from 'helmet';
 // import tweetsRouter from './router/tweetsRouter.js'
 import tweetsRouter from './router/tweets.js';
 import authRouter from './router/auth.js';
-import { initSocket } from './connection/socket.js';
+import { initSocket, getSocketIO } from './connection/socket.js';
 import config from './config.js';
 import { sequelize } from './db/database.js';
+import { TweetController } from '../controller/tweet.js';
+import * as tweetRepository from '../data/tweet.js';
 
 /**
  * 
@@ -17,8 +19,6 @@ import { sequelize } from './db/database.js';
  * 
  * process는 전역변수다. 어느 파일에서든 사용 가능.
  */
-
-
 
 const app = express();
 
@@ -32,7 +32,9 @@ app.use(helmet());
 app.use(cors(corsOption));
 app.use(morgan('tiny'));
 
-app.use('/tweets',tweetsRouter);
+app.use('/tweets',
+    tweetsRouter(new TweetController(tweetRepository, getSocketIO))
+);
 app.use('/auth',authRouter);
 
 
