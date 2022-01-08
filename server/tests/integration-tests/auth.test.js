@@ -64,11 +64,9 @@ describe('Auth', () => {
 
     describe('POST to /auth/login', () => {
         it('존재하지 않는 유저 401 반환', async () => {
-            const user = await createUser();
-
             const res = await req.post('/auth/login', {
                 username: faker.random.alpha(16),
-                password: user.password
+                password: faker.random.alpha(16)
             });
             
             expect(res.status).toBe(401);
