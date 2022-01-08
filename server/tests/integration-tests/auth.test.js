@@ -2,21 +2,16 @@ import axios from "axios";
 import { startServer, stopServer } from "../../app.js";
 import faker from 'faker';
 import { sequelize } from "../../db/database.js";
-import jwt from 'jsonwebtoken';
-import * as userRepository from '../../data/auth.js';
 
 /**
- * 유의할 점) 테스트 전후로 설정과 DB 초기화
- * 1. 서버 실행
+ * 1. 테스트 전후로 설정과 DB 초기화
+ * 2. 하지만 Each로 매번 DB를 초기화하는 것은 성능상 비효율적이다.
  */
-
 describe('Auth', () => {
-    let server, req, fakeUser;
-    // Each로 매번 DB를 초기화하는 것은 성능상 비효율적이다.
+    let server, req;
     beforeAll(async () => {
         server = await startServer();
         req = axios.create({
-            // axios 자체적으로 에러처리를 하지 않도록한다.(?)
             baseURL: `http://127.0.0.1:8080`,
             validateStatus: null,
         });
