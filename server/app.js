@@ -8,8 +8,8 @@ import authRouter from './router/auth.js';
 import { initSocket, getSocketIO } from './connection/socket.js';
 import config from './config.js';
 import { sequelize } from './db/database.js';
-import { TweetController } from '../controller/tweet.js';
-import * as tweetRepository from '../data/tweet.js';
+import { TweetController } from './controller/tweet.js';
+import * as tweetRepository from './data/tweet.js';
 
 /**
  * 
@@ -20,36 +20,50 @@ import * as tweetRepository from '../data/tweet.js';
  * process는 전역변수다. 어느 파일에서든 사용 가능.
  */
 
-const app = express();
-
 const corsOption = {
     origin: config.cors.allowedOrigin,
     optionsSuccessStatus: 200,
 }
+export async function startServer() {
+    const app = express();
 
-app.use(express.json());
-app.use(helmet());
-app.use(cors(corsOption));
-app.use(morgan('tiny'));
+    app.use(express.json());
+    app.use(helmet());
+    app.use(cors(corsOption));
+    app.use(morgan('tiny'));
 
-app.use('/tweets',
-    tweetsRouter(new TweetController(tweetRepository, getSocketIO))
-);
-app.use('/auth',authRouter);
+    app.use('/tweets',
+        tweetsRouter(new TweetController(tweetRepository, getSocketIO))
+    );
+    app.use('/auth',authRouter);
 
+    app.use((req,res,next) => {
+        res.sendStatus(404);
+    })
 
-app.use((req,res,next) => {
-    res.sendStatus(404);
-})
+    app.use((error,req,res,next) => {
+        // 에러로그 받기.
+        console.error(error);
+        res.sendStatus(500);
+    });
 
-app.use((error,req,res,next) => {
-    // 에러로그 받기.
-    console.error(error);
-    res.sendStatus(500);
-});
-
-sequelize.sync().then(() => {
+    await sequelize.sync();
     console.log(`Server is started... ${new Date()}`);
     const server = app.listen(config.port);
-    initSocket(server);
-})
+    initSocket(server)
+
+    return server;
+}
+
+export async function stopServer(server) {
+    return new Promise((resolve, reject) => {
+        server.close(async () => {
+            try {
+                await sequelize.stop();
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        })
+    })
+}
