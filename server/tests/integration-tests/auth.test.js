@@ -36,42 +36,25 @@ describe('Auth', () => {
     });
 
     describe('POST to /auth/signup', () => {
-        it('username 5자 미만일 경우', async () => {
-            const fake = { ...user, username: faker.random.alphaNumeric(4) }
-            const res = await req.post('/auth/signup', fake);
-            
-            expect(res.status).toBe(400);
-            expect(res.data.message).toBe('username should be at least 5 characters');
-        });
-        it('password 5자 미만일 경우', async () => {
-            const fake = { ...user, password: faker.random.alphaNumeric(4) }
-            const res = await req.post('/auth/signup', fake);
-            
-            expect(res.status).toBe(400);
-            expect(res.data.message).toBe('password should be at least 5 characters');
-        });
-        it('name 정보 없을 경우', async () => {
-            const fake = { ...user, name: null }
-            const res = await req.post('/auth/signup', fake);
-            
-            expect(res.status).toBe(400);
-            expect(res.data.message).toBe('name is missing');
-        });
-        it('이메일 형식이 아닐 경우', async () => {
-            const fake = { ...user, email: faker.random.alphaNumeric(4) }
-            const res = await req.post('/auth/signup', fake);
-            
-            expect(res.status).toBe(400);
-            expect(res.data.message).toBe('invalid email');
-        });
-        it('URL 형식이 아닐 경우', async () => {
-            const fake = { ...user, url: faker.random.alphaNumeric(4) }
-            const res = await req.post('/auth/signup', fake);
-            
-            expect(res.status).toBe(400);
-            expect(res.data.message).toBe('invalid URL');
-        });
+        describe('validations', () => {
+            test.each([
+                ['username should be at least 5 characters', 'username', faker.random.alphaNumeric(4)],
+                ['password should be at least 5 characters' , 'password', faker.random.alphaNumeric(4)],
+                ['name is missing', 'name', null ],
+                ['invalid email', 'email', faker.random.alphaNumeric(4)],
+                ['invalid URL', 'url', faker.random.alphaNumeric(4) ],
+            ])('%s', async (message, key, value) => {
+                const data = {
+                    ...user,
+                    [key]: value
+                };
 
+                const res = await req.post('/auth/signup', data);
+                
+                expect(await res.status).toBe(400);
+                expect(await res.data.message).toBe(message);
+            });
+        });
         it('returns 201 and authorization token when user details are valid', async () => {
             const res = await req.post('/auth/signup', user);
 
@@ -135,7 +118,7 @@ describe('Auth', () => {
             const res = await req.post('auth/login', loginBody);
             token = res.data.token;
         });
-        
+
         it('인증된 유저일 경우 토큰과 이름 반환', async () => {
             const req = axios.create({
                 baseURL: 'http://localhost:8080',
